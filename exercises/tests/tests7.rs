@@ -34,13 +34,11 @@
 // Execute `rustlings hint tests7` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
-
 fn main() {}
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    //use super::*;
 
     #[test]
     fn test_success() {
@@ -48,7 +46,13 @@ mod tests {
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        let s = std::env::var("TEST_FOO").unwrap();
+        let s = match std::env::var("TEST_FOO") {
+            Ok(val) => val, // 变量存在
+            Err(e) => {
+                println!("环境变量错误: {}", e); // 打印错误
+                "default_value".to_string() // 提供默认值
+            }
+        };
         let e: u64 = s.parse().unwrap();
         assert!(timestamp >= e && timestamp < e + 10);
     }

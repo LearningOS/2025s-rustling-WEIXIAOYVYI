@@ -3,10 +3,38 @@
 	This problem requires you to implement a sorting algorithm
 	you can use bubble sorting, insertion sorting, heap sorting, etc.
 */
-// I AM NOT DONE
-
-fn sort<T>(array: &mut [T]){
-	//TODO
+use std::mem::swap;
+fn sort<T: std::cmp::PartialOrd>(array: &mut [T]){
+	let (start,end) = (0,array.len()); // 0 1
+    let (mut i,mut j) = (start,end-1); // 0 0
+    let mut status = true;
+    while i<j{
+        if status{
+            while j>i && array[j]>=array[i]{
+                j -= 1;
+            }
+            if j>i{
+                array.swap(i,j);
+                status = ! status;
+            }
+        }
+        else{
+            while i<j && array[i]<=array[j]{
+                i += 1;
+            }
+            if i<j{
+                array.swap(i,j);
+                status = ! status;
+            }
+        }
+        if i != end-1{
+            sort(&mut array[i+1..end]);
+        }
+        if i != start{
+            sort(&mut array[0..i]);
+        }
+    }
+    println!("i={i} j={j}");
 }
 #[cfg(test)]
 mod tests {

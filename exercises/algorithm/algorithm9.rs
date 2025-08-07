@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -23,7 +22,7 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: vec![],
             comparator,
         }
     }
@@ -37,7 +36,17 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        for i in 0..=self.items.len(){
+            if i == self.items.len(){
+                self.items.push(value);
+                break;
+            }
+            if !(self.comparator)(&value,&self.items[i]){
+                self.items.insert(i,value);
+                break;
+            }
+        }
+        self.count += 1;
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -82,10 +91,15 @@ where
     T: Default,
 {
     type Item = T;
-
+    
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.len() == 0{
+            return None;
+        }
+        else{
+            self.items.pop()
+        }
+		
     }
 }
 

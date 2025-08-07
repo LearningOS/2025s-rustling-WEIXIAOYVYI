@@ -2,19 +2,18 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
 
 #[derive(Debug)]
-struct Node<T> {
+struct Node<T: std::cmp::PartialOrd> {
     val: T,
     next: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Node<T> {
+impl<T: std::cmp::PartialOrd> Node<T> {
     fn new(t: T) -> Node<T> {
         Node {
             val: t,
@@ -23,19 +22,19 @@ impl<T> Node<T> {
     }
 }
 #[derive(Debug)]
-struct LinkedList<T> {
+struct LinkedList<T: std::cmp::PartialOrd> {
     length: u32,
     start: Option<NonNull<Node<T>>>,
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: std::cmp::PartialOrd> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: std::cmp::PartialOrd> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,20 +68,52 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(mut list_a:LinkedList<T>,mut list_b:LinkedList<T>)-> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        if list_a.start.is_none() { return list_b; }
+        if list_b.start.is_none() { return list_a; }
+        let mut dummy = Node {
+            val: unsafe { std::mem::zeroed() }, // 哑节点占位
+            next: None,
+        };
+        let mut tail = NonNull::new(&mut dummy).unwrap();
+        unsafe {
+            let mut p1 = list_a.start;
+            let mut p2 = list_b.start;
+            while let (Some(mut node1), Some(mut node2)) = (p1, p2) {
+                if node1.as_ref().val <= node2.as_ref().val { //node:NonNull<Node<T>>  node.as_ref():Node<T> 
+                    tail.as_mut().next = Some(node1);
+                    tail = node1;
+                    p1 = node1.as_ref().next;
+                } else {
+                    tail.as_mut().next = Some(node2);
+                    tail = node2;
+                    p2 = node2.as_ref().next;
+                }
+            }
+            tail.as_mut().next = p1.or(p2);
+
+            // 构建新链表并重置原链表
+            LinkedList {
+                start: dummy.next,
+                end: if dummy.next.is_some() {
+                    // 更新尾指针：遍历到末尾或复用 existing tail
+                    dummy.next.and_then(|mut p| {
+                        while let Some(next) = p.as_ref().next {
+                            p = next;
+                        }
+                        Some(p)
+                    })
+                } else { None },
+                length: list_a.length + list_b.length,
+            }
         }
 	}
 }
 
 impl<T> Display for LinkedList<T>
 where
-    T: Display,
+    T: Display + std::cmp::PartialOrd,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.start {
@@ -94,7 +125,7 @@ where
 
 impl<T> Display for Node<T>
 where
-    T: Display,
+    T: Display +  std::cmp::PartialOrd,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.next {
